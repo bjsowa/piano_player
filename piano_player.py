@@ -6,7 +6,7 @@ from pygame import midi, mixer
 
 from init import init,quit
 
-inputs, sounds, sustain = init()
+inputs, outputs, sounds, sustain = init()
 
 while True:
     try:
@@ -24,8 +24,13 @@ while True:
                     except KeyError:
                         continue
                 print( notes )
+                for out in outputs:
+                    out.write(notes)
     except KeyboardInterrupt:
         break
 
-del inputs, sounds, sustain
-quit()
+for inp in inputs:
+    inp.close()
+for out in outputs:
+    out.close()
+del sounds, sustain
