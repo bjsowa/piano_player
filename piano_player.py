@@ -24,8 +24,9 @@ while True:
                     except KeyError:
                         continue
                 print( notes )
-                for out in outputs:
-                    out.write(notes)
+                if inp == inputs[0]:
+                    for out in outputs:
+                        out.write(notes)
     except KeyboardInterrupt:
         break
 

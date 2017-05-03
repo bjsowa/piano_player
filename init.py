@@ -28,7 +28,7 @@ def init():
         if dev_info[2] == 1:
             it += 1
             dev_dic[it] = x
-            print( '[{}]'.format(it), midi.get_device_info(x) )
+            print( '[{}]'.format(it), midi.get_device_info(x)[1].decode('utf-8') )
 
     # wybieranie urządzeń wejściowych
     input_devs = []
@@ -70,7 +70,7 @@ def init():
             if dev_info[3] == 1:
                 it += 1
                 dev_dic[it] = x
-                print( '[{}]'.format(it), midi.get_device_info(x) )
+                print( '[{}]'.format(it), midi.get_device_info(x)[1].decode('utf-8') )
 
     # wybieranie urządzenia wyjściowego
         try:
@@ -88,7 +88,7 @@ def init():
         inputs.append( midi.Input(dev) )
     outputs = []
     for dev in output_devs:
-        outputs.append( midi.Output(dev) )
+        outputs.append( midi.Output(dev, latency = 1000) )
 
     # określanie pozostałych ustawień
     try:
