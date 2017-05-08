@@ -1,6 +1,6 @@
 from pygame import midi, mixer
 
-def init():
+def MidiInit():
     # pygame inits
     mixer.pre_init(44100, -16, 2, 256)
     mixer.init()
@@ -57,38 +57,38 @@ def init():
 
         input_devs.append(dev_dic[dev])
 
-    # zapytanie o urządzenie wyjsciowe
-    output_devs = []
-    ans = input( "Czy dodać urządzenie wyjściowe (T/N) [N]: ")
-    if len(ans) > 0 and (ans[0] == 't' or ans[0] == 'T'):
+    # # zapytanie o urządzenie wyjsciowe
+    # output_devs = []
+    # ans = input( "Czy dodać urządzenie wyjściowe (T/N) [N]: ")
+    # if len(ans) > 0 and (ans[0] == 't' or ans[0] == 'T'):
 
-    # wypisywanie urządzeń wyjściowych
-        dev_dic.clear()
-        it = 0
-        for x in range( midi.get_count() ):
-            dev_info = midi.get_device_info(x)
-            if dev_info[3] == 1:
-                it += 1
-                dev_dic[it] = x
-                print( '[{}]'.format(it), midi.get_device_info(x)[1].decode('utf-8') )
+    # # wypisywanie urządzeń wyjściowych
+    #     dev_dic.clear()
+    #     it = 0
+    #     for x in range( midi.get_count() ):
+    #         dev_info = midi.get_device_info(x)
+    #         if dev_info[3] == 1:
+    #             it += 1
+    #             dev_dic[it] = x
+    #             print( '[{}]'.format(it), midi.get_device_info(x)[1].decode('utf-8') )
 
-    # wybieranie urządzenia wyjściowego
-        try:
-            dev = int(input( "Wybierz urządzenie wyjściowe [" + str(it) + "]: " ))
-        except ValueError:
-            dev = it
-        if not 1 <= dev <= it:
-            dev = it 
+    # # wybieranie urządzenia wyjściowego
+    #     try:
+    #         dev = int(input( "Wybierz urządzenie wyjściowe [" + str(it) + "]: " ))
+    #     except ValueError:
+    #         dev = it
+    #     if not 1 <= dev <= it:
+    #         dev = it 
 
-        output_devs.append(dev_dic[dev])
+    #     output_devs.append(dev_dic[dev])
 
     # inicjalizacja urzadzeń 
     inputs = []
     for dev in input_devs:
         inputs.append( midi.Input(dev) )
-    outputs = []
-    for dev in output_devs:
-        outputs.append( midi.Output(dev, latency = 1000) )
+    # outputs = []
+    # for dev in output_devs:
+    #     outputs.append( midi.Output(dev, latency = 1000) )
 
     # określanie pozostałych ustawień
     try:
@@ -103,8 +103,8 @@ def init():
 
     mixer.set_num_channels(channels)
 
-    return inputs,outputs,sounds,sustain
+    return inputs,sounds,sustain
 
-def quit():
+def MidiQuit():
     midi.quit()
     mixer.quit()
