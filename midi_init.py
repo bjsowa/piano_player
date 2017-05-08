@@ -92,12 +92,12 @@ def MidiInit():
 
     # określanie pozostałych ustawień
     try:
-        sustain = int(input( 'Podaj wartość sustain (domyślnie 200): ' ))
+        sustain = int(input( 'Podaj wartość sustain [200]: ' ))
     except ValueError:
         sustain = 200
 
     try:
-        channels = int(input( 'Podaj ilość kanałów dźwiękowych (domyślnie 16): ' ))
+        channels = int(input( 'Podaj ilość kanałów dźwiękowych [16]: ' ))
     except ValueError:
         channels = 16
 
