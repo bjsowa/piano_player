@@ -1,3 +1,4 @@
+from os import listdir, path
 from pygame import midi, mixer
 
 def MidiInit():
@@ -5,12 +6,6 @@ def MidiInit():
     mixer.pre_init(44100, -16, 2, 256)
     mixer.init()
     midi.init()
-
-    # inicjalizacja plików dźwiękowych
-    sounds = {}
-    for i in range(20,110):
-        path = "piano_samples/" + str(i) + ".wav"
-        sounds[i] = mixer.Sound( path )
      
     # wybieranie ilości urządzeń wejściowych
     try:
@@ -89,6 +84,37 @@ def MidiInit():
     # outputs = []
     # for dev in output_devs:
     #     outputs.append( midi.Output(dev, latency = 1000) )
+
+    # wypisywanie dostępnych sampli
+    dirlist = listdir('./samples')
+    dir_dic = {}
+    it = 0
+    for dirname in dirlist:
+        if path.isdir('./samples/' + dirname):
+            it += 1
+            dir_dic[it] = dirname
+            print( '[{}]'.format(it), dirname )
+
+    # wybieranie sampli
+    try:
+        samp = input( "Wybierz sample dźwiękowe [" + str(it) + "]: " )
+    except ValueError:
+        samp = it
+    if samp not in dir_dic:
+        samp = it
+
+    samp_path = './samples/' + dir_dic[samp]
+
+    # inicjalizacja plików dźwiękowych
+    sounds = {}
+    for samp_name in listdir(samp_path):
+        name, ext = path.splitext(samp_name)
+        if ext == '.wav':
+            try:
+                it = int(name)
+            except:
+                continue
+            sounds[it] = mixer.Sound( samp_path + '/' + samp_name )
 
     # określanie pozostałych ustawień
     try:
