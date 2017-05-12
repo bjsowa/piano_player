@@ -1,9 +1,9 @@
-import sys
-import pygame
+import pygame as pg
+
 from pygame import midi, mixer
 from threading import Thread
 
-from midi_init import *
+from midi_init import MidiInit, MidiQuit
 
 NOTE_ON = 144
 NOTE_OFF = 128
@@ -31,14 +31,18 @@ class MidiInput(Thread):
                     for x in notes:
                         note = Note(x)
                         if note.type == NOTE_ON:
+                            event = pg.event.Event( pg.USEREVENT, { 'NoteOn': True, 'NoteOff': False, 'Pitch': note.pitch } )
+                            pg.event.post(event)
                             if note.pitch in self.sounds:
                                 self.sounds[note.pitch].set_volume( float(note.velocity) / 127.0 )
                                 self.sounds[note.pitch].play()
                         elif note.type == NOTE_OFF:
+                            event = pg.event.Event( pg.USEREVENT, { 'NoteOn': False, 'NoteOff': True, 'Pitch': note.pitch } )
+                            pg.event.post(event)
                             if note.pitch in self.sounds:
                                 self.sounds[note.pitch].fadeout(self.sustain)
-                    print( notes )
-            pygame.time.wait(10)
+                    #print( notes)
+            pg.time.wait(10)
 
     def close(self):
         for inp in self.inputs:
