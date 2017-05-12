@@ -1,6 +1,7 @@
 #!/home/blazej/.virtualenv/python3.6/bin/python
 
 import pygame as pg
+import traceback
 
 from midi_input import MidiInput
 from keypad import Keypad
@@ -13,11 +14,11 @@ width = pg.display.Info().current_w
 height = pg.display.Info().current_h
 size = width, height
 
-screen = pg.display.set_mode( size )
+screen = pg.display.set_mode( size, pg.FULLSCREEN )
 pg.mouse.set_visible( False )
 
 # inicjalizacja klawiatury
-keypad = Keypad( 'img/piano.png', width, 24 )
+keypad = Keypad( 'img/piano.png', 'img/keys/', width, 24 )
 
 screen.blit( keypad, (keypad.offset,height - keypad.get_height()) )
 pg.display.update()
@@ -43,7 +44,13 @@ while not exit:
                 keypad.NoteOff(event.Pitch)
 
     screen.fill( (0,0,0) )
-    keypad.NextFrame()
+
+    try:
+        keypad.NextFrame()
+    except:
+        traceback.print_exc()
+        exit = True
+
     screen.blit( keypad, (keypad.offset,height - keypad.get_height()) )
     pg.display.update()
 
