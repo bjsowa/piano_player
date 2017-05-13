@@ -67,6 +67,16 @@ class Keypad(Surface):
     def NoteOn(self, pitch):
         if self.min_pitch <= pitch <= self.max_pitch:
             if pitch in self.key_pressed:
+                if self.key_pressed[pitch].fadeout:
+                    octave_offset = ((pitch - self.min_pitch) // 12) * self.octave_width
+                    key_nr = pitch % 12
+                    new_rect = pg.Rect( octave_offset + self.key_info[key_nr][0], 0, self.key_info[key_nr][1], 0 )
+                    diatonic = False
+                    if key_nr in [0,2,4,5,7,9,11]:
+                        diatonic = True
+                    self.key_pressed[pitch].rect = new_rect
+                    self.rects.append( (new_rect, diatonic) )
+
                 self.key_pressed[pitch].fadein = True
                 self.key_pressed[pitch].fadeout = False
             else:
