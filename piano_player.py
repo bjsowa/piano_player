@@ -6,6 +6,9 @@ import traceback
 from midi_input import MidiInput
 from keypad import Keypad
 
+exit = False
+clock = pg.time.Clock()
+
 # inicjalizacja midi i ekranu
 midi = MidiInput()
 pg.display.init()
@@ -16,19 +19,22 @@ size = width, height
 
 screen = pg.display.set_mode( size, pg.FULLSCREEN )
 pg.mouse.set_visible( False )
+background = (12,12,12)
+screen.fill(background)
+pg.display.update()
 
 # inicjalizacja klawiatury
-keypad = Keypad( 'img/piano.png', 'img/keys/', width, 24 )
+try:
+    keypad = Keypad( 'img/piano.png', 'img/keys/', width, 24 )
+except:
+    traceback.print_exc()
+    exit = True
 
 screen.blit( keypad, (keypad.offset,height - keypad.get_height()) )
 pg.display.update()
 
-
 # rozpoczęcie działania
 midi.start()
-
-exit = False
-clock = pg.time.Clock()
 
 while not exit:
     for event in pg.event.get():
@@ -43,15 +49,14 @@ while not exit:
             elif event.NoteOff:
                 keypad.NoteOff(event.Pitch)
 
-    screen.fill( (0,0,0) )
-
     try:
         keypad.NextFrame()
     except:
         traceback.print_exc()
         exit = True
 
-    screen.blit( keypad, (keypad.offset,height - keypad.get_height()) )
+    screen.fill( background )
+    screen.blit( keypad, (keypad.offset, height - keypad.get_height()) )
     pg.display.update()
 
     clock.tick(60)
