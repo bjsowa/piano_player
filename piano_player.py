@@ -1,5 +1,3 @@
-#!/home/blazej/.virtualenv/python3.6/bin/python
-
 import pygame as pg
 import traceback
 
@@ -47,10 +45,14 @@ while not exit:
             if event.key == pg.K_ESCAPE:
                 exit = True
         elif event.type == pg.USEREVENT:
-            if event.NoteOn:
-                keypad.NoteOn(event.Pitch)
-            elif event.NoteOff:
-                keypad.NoteOff(event.Pitch)
+            try:
+                if event.NoteOn:
+                    keypad.NoteOn(event.Pitch, event.Player)
+                elif event.NoteOff:
+                    keypad.NoteOff(event.Pitch, event.Player)
+            except:
+                traceback.print_exc()
+                exit = True
 
     try:
         keypad.NextFrame()
@@ -66,14 +68,14 @@ while not exit:
             my_rect = rect[0].copy()
             my_rect.left += keypad.offset
             my_rect.top += height - keypad.get_height()
-            pg.draw.rect( screen, diatonic_color, my_rect )
+            pg.draw.rect( screen, rect[2], my_rect )
         
     for rect in keypad.rects:
         if not rect[1]:
             my_rect = rect[0].copy()
             my_rect.left += keypad.offset
             my_rect.top += height - keypad.get_height()
-            pg.draw.rect( screen, chromatic_color, my_rect )
+            pg.draw.rect( screen, rect[2], my_rect )
 
     pg.display.update()
 

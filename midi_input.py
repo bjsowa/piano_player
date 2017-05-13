@@ -24,20 +24,27 @@ class MidiInput(Thread):
         self.end = False
 
     def run(self):
+        # wywalenie śmieci
+        for inp in self.inputs:
+            if inp.poll():
+                notes = inp.read(50)
+
         while not self.end:
-            for inp in self.inputs:
+            for player, inp in enumerate(self.inputs):
                 if inp.poll():
                     notes = inp.read(10)
                     for x in notes:
                         note = Note(x)
                         if note.type == NOTE_ON:
-                            event = pg.event.Event( pg.USEREVENT, { 'NoteOn': True, 'NoteOff': False, 'Pitch': note.pitch } )
+                            event = pg.event.Event( pg.USEREVENT, 
+                                { 'NoteOn': True, 'NoteOff': False, 'Pitch': note.pitch, 'Player': player } )
                             pg.event.post(event)
                             if note.pitch in self.sounds:
                                 self.sounds[note.pitch].set_volume( float(note.velocity) / 127.0 )
                                 self.sounds[note.pitch].play()
                         elif note.type == NOTE_OFF:
-                            event = pg.event.Event( pg.USEREVENT, { 'NoteOn': False, 'NoteOff': True, 'Pitch': note.pitch } )
+                            event = pg.event.Event( pg.USEREVENT, 
+                                { 'NoteOn': False, 'NoteOff': True, 'Pitch': note.pitch, 'Player': player } )
                             pg.event.post(event)
                             if note.pitch in self.sounds:
                                 self.sounds[note.pitch].fadeout(self.sustain)
