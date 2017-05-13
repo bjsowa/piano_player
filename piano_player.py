@@ -62,14 +62,18 @@ while not exit:
     screen.blit( keypad, (keypad.offset, height - keypad.get_height()) )
 
     for rect in keypad.rects:
-        my_rect = rect[0].copy()
-        my_rect.left += keypad.offset
-        my_rect.top += height - keypad.get_height()
         if rect[1]:
-            color = diatonic_color
-        else:
-            color = chromatic_color
-        pg.draw.rect( screen, color, my_rect )
+            my_rect = rect[0].copy()
+            my_rect.left += keypad.offset
+            my_rect.top += height - keypad.get_height()
+            pg.draw.rect( screen, diatonic_color, my_rect )
+        
+    for rect in keypad.rects:
+        if not rect[1]:
+            my_rect = rect[0].copy()
+            my_rect.left += keypad.offset
+            my_rect.top += height - keypad.get_height()
+            pg.draw.rect( screen, chromatic_color, my_rect )
 
     pg.display.update()
 
