@@ -106,7 +106,7 @@ def MidiInit():
     samp_path = './samples/' + dir_dic[samp]
 
     # inicjalizacja plików dźwiękowych
-    sounds = {}
+    sounds = [{},{}]
     for samp_name in listdir(samp_path):
         name, ext = path.splitext(samp_name)
         if ext == '.wav':
@@ -114,7 +114,9 @@ def MidiInit():
                 it = int(name)
             except:
                 continue
-            sounds[it] = mixer.Sound( samp_path + '/' + samp_name )
+            sounds[0][it] = mixer.Sound( samp_path + '/' + samp_name )
+            if dev_n == 2:
+                sounds[1][it] = mixer.Sound( sounds[0][it] )
 
     # określanie pozostałych ustawień
     try:
@@ -123,9 +125,9 @@ def MidiInit():
         sustain = 200
 
     try:
-        channels = int(input( 'Podaj ilość kanałów dźwiękowych [16]: ' ))
+        channels = int(input( 'Podaj ilość kanałów dźwiękowych [' + str(16*dev_n) + ']: ' ))
     except ValueError:
-        channels = 16
+        channels = 16*dev_n
 
     mixer.set_num_channels(channels)
 

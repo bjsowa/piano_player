@@ -39,16 +39,15 @@ class MidiInput(Thread):
                             event = pg.event.Event( pg.USEREVENT, 
                                 { 'NoteOn': True, 'NoteOff': False, 'Pitch': note.pitch, 'Player': player } )
                             pg.event.post(event)
-                            if note.pitch in self.sounds:
-                                self.sounds[note.pitch].set_volume( float(note.velocity) / 127.0 )
-                                self.sounds[note.pitch].play()
+                            if note.pitch in self.sounds[player]:
+                                self.sounds[player][note.pitch].set_volume( float(note.velocity) / 127.0 )
+                                self.sounds[player][note.pitch].play()
                         elif note.type == NOTE_OFF:
                             event = pg.event.Event( pg.USEREVENT, 
                                 { 'NoteOn': False, 'NoteOff': True, 'Pitch': note.pitch, 'Player': player } )
                             pg.event.post(event)
-                            if note.pitch in self.sounds:
-                                self.sounds[note.pitch].fadeout(self.sustain)
-                    #print( notes)
+                            if note.pitch in self.sounds[player]:
+                                self.sounds[player][note.pitch].fadeout(self.sustain)
             pg.time.wait(10)
 
     def close(self):
