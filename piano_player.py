@@ -6,6 +6,9 @@ import traceback
 from midi_input import MidiInput
 from keypad import Keypad
 
+diatonic_color = (66,128,231)
+chromatic_color = (59,101,151)
+
 exit = False
 clock = pg.time.Clock()
 
@@ -57,6 +60,17 @@ while not exit:
 
     screen.fill( background )
     screen.blit( keypad, (keypad.offset, height - keypad.get_height()) )
+
+    for rect in keypad.rects:
+        my_rect = rect[0].copy()
+        my_rect.left += keypad.offset
+        my_rect.top += height - keypad.get_height()
+        if rect[1]:
+            color = diatonic_color
+        else:
+            color = chromatic_color
+        pg.draw.rect( screen, color, my_rect )
+
     pg.display.update()
 
     clock.tick(60)

@@ -5,6 +5,7 @@ from os import path
 from ast import literal_eval
 
 FADE_PERIOD = 5
+STEP = 2
 
 def blit_alpha(target, source, location, opacity):
         x,y = location
@@ -15,11 +16,12 @@ def blit_alpha(target, source, location, opacity):
         target.blit(temp, location)
 
 class Key():
-    def __init__(self, pitch, alpha, fadein: bool, fadeout: bool):
+    def __init__(self, pitch, alpha, fadein: bool, fadeout: bool, rect):
         self.pitch = pitch
         self.alpha = alpha
         self.fadein = fadein
         self.fadeout = fadeout
+        self.rect = rect
 
 class Keypad(Surface):
     # offset, min_pitch, max_pitch, octave_width
@@ -56,9 +58,9 @@ class Keypad(Surface):
         for i in range(12):
             self.key_surfaces.append( pg.image.load( path.join(keys_path, str(i)+'.png')) )
             line = inf.readline()
-            key_info.append( literal_eval(line) )
+            self.key_info.append( literal_eval(line) )
 
-        self.Rects = []
+        self.rects = []
         self.key_pressed = {}
 
 
@@ -68,9 +70,16 @@ class Keypad(Surface):
                 self.key_pressed[pitch].fadein = True
                 self.key_pressed[pitch].fadeout = False
             else:
-                new_key = Key( pitch, 0, True, False )
+                octave_offset = ((pitch - self.min_pitch) // 12) * self.octave_width
+                key_nr = pitch % 12
+                new_rect = pg.Rect( octave_offset + self.key_info[key_nr][0], 0, self.key_info[key_nr][1], 0 )
+                diatonic = False
+                if key_nr in [0,2,4,5,7,9,11]:
+                    diatonic = True
+                new_key = Key( pitch, 0, True, False, new_rect )
                 self.key_pressed[pitch] = new_key
-            
+                self.rects.append( (new_rect, diatonic) )
+
 
     def NoteOff(self, pitch):
         if self.min_pitch <= pitch <= self.max_pitch:
@@ -83,17 +92,19 @@ class Keypad(Surface):
         to_delete = []
         self.blit( self.keypad_surface, (0,0) )
         for pitch, key in self.key_pressed.items():
-            if key.fadein:
-                if key.alpha < FADE_PERIOD:
-                    key.alpha += 1
-                if key.alpha == FADE_PERIOD:
-                    key.fadein = False
-            elif key.fadeout:
+            if key.fadeout:
                 key.alpha -= 1
                 if key.alpha <= 0:
                     key.fadeout = False
                     to_delete.append(pitch)
                     continue
+            else:
+                key.rect.height += STEP
+                if key.fadein:
+                    if key.alpha < FADE_PERIOD:
+                        key.alpha += 1
+                    if key.alpha == FADE_PERIOD:
+                        key.fadein = False
             octave_offset = ((pitch - self.min_pitch) // 12) * self.octave_width
             key_nr = pitch % 12
             alpha = int((255/FADE_PERIOD)*key.alpha)
@@ -101,3 +112,8 @@ class Keypad(Surface):
             
         for p in to_delete:
             self.key_pressed.pop(p)
+
+        for i in range( len(self.rects) - 1, -1, -1 ):
+            self.rects[i][0].top -= STEP
+            if self.rects[i][0].top + self.rects[i][0].height < -1000:
+                del self.rects[i]
