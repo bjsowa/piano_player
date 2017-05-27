@@ -5,6 +5,7 @@ from threading import Thread
 from queue import Queue
 
 from midi_init import MidiInit, MidiQuit
+from piano_ai import PianoAI
 
 NOTE_ON = 144
 NOTE_OFF = 128
@@ -22,7 +23,9 @@ class Note:
 class MidiInput(Thread):
     def __init__(self):
         Thread.__init__(self)
-        self.inp, self.sounds, self.sustain = MidiInit()
+        self.inputs, self.output, self.sounds, self.sustain = MidiInit()
+        self.noteQueue = Queue()
+        self.pianoai = PianoAI( self.output, self.noteQueue )
         self.end = False
 
     def write_note( self, note: Note, player ):
@@ -41,19 +44,32 @@ class MidiInput(Thread):
                 self.sounds[player][note.pitch].fadeout(self.sustain)
 
     def run(self):
+        self.pianoai.start()
+
         # wywalenie śmieci
-        if self.inp.poll():
-            notes = self.inp.read(50)
+        for inp in self.inputs:
+            if inp.poll():
+                inp.read(50)
 
         while not self.end:
-            if self.inp.poll():
-                notes = self.inp.read(10)
-                for x in notes:
-                    note = Note(x)
-                    self.write_note( note, 0 )
+            for player, inp in enumerate(self.inputs):
+                if inp.poll():
+                    notes = inp.read(10)
+                    for x in notes:
+                        if player == 0:
+                            self.noteQueue.put(x)
+                        # elif player == 1:
+                        #     print( x )
+                        note = Note(x)
+                        self.write_note( note, player )
             pg.time.wait(10)
 
+        self.pianoai.end = True
+        self.pianoai.join()
+
     def close(self):
-        self.inp.close()
+        for inp in self.inputs:
+            inp.close()
+        self.output.close()
         del self.sounds
         MidiQuit()

@@ -44,6 +44,8 @@ while not exit:
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_ESCAPE:
                 exit = True
+            elif event.key == pg.K_SPACE:
+                midi.pianoai.send_notes()
         elif event.type == pg.USEREVENT:
             try:
                 if event.NoteOn:

@@ -15,9 +15,9 @@ def MidiInit():
         if dev_info[2] == 1:
             it += 1
             dev_dic[it] = x
-            print( '[{}]'.format(it), midi.get_device_info(x)[1].decode('utf-8') )
+            print( '[{}]'.format(it), dev_info[1].decode('utf-8') )
 
-    # wybieranie urządzeń wejściowych
+    # wybieranie urządzenia wejściowego
     try:
         dev = int(input( "Wybierz urządzenie wejściowe [" + str(it) + "]: " ))
     except ValueError:
@@ -25,8 +25,39 @@ def MidiInit():
     if dev not in dev_dic:
         dev = it
 
+    # inicjalizacja urzadzenia
+    inputs = []
+    inputs.append(midi.Input(dev_dic[dev]))
+    del dev_dic[dev]
+
+    # wypisywanie urządzeń wej-wyj
+    dev_out_dic = {}
+    for x in dev_dic.keys():
+        dev_info = midi.get_device_info(dev_dic[x])
+        for dev in range( midi.get_count() ):
+            dev_info1 = midi.get_device_info(dev)
+            if dev_info[1] == dev_info1[1] and dev_info1[3] == 1:
+                dev_out_dic[x] = dev
+                break
+        if x in dev_out_dic:
+            print( '[{}]'.format(x), dev_info[1].decode('utf-8') )
+
+    for x in dev_dic.keys():
+        if x in dev_out_dic:
+            it = x
+            break
+
+    # wybieranie urządzeia wej-wyj dla AI
+    try:
+        dev = int(input( "Wybierz urządzenie dla AI [" + str(it) + "]: " ))
+    except ValueError:
+        dev = it
+    if dev not in dev_dic or dev not in dev_out_dic:
+        dev = it
+
     # inicjalizacja urzadzeia 
-    input_dev = midi.Input(dev_dic[dev])
+    inputs.append(midi.Input(dev_dic[dev]))
+    output = midi.Output(dev_out_dic[dev], latency = 500)
 
     # wypisywanie dostępnych sampli
     dirlist = listdir('./samples')
@@ -73,7 +104,7 @@ def MidiInit():
 
     mixer.set_num_channels(channels)
 
-    return input_dev,sounds,sustain
+    return inputs,output,sounds,sustain
 
 def MidiQuit():
     midi.quit()
