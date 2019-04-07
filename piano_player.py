@@ -40,12 +40,9 @@ pg.display.update()
 midi.start()
 
 while not exit:
-    for event in pg.event.get():
+    for event in pg.event.get([pg.QUIT, pg.USEREVENT]):
         if event.type == pg.QUIT:
             exit = True
-        elif event.type == pg.KEYDOWN:
-            if event.key == pg.K_ESCAPE:
-                exit = True
         elif event.type == pg.USEREVENT:
             try:
                 if event.NoteOn:

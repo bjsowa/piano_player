@@ -2,7 +2,6 @@ import pygame as pg
 
 from pygame import midi, mixer
 from threading import Thread
-from queue import Queue
 
 from midi_init import MidiInit, MidiQuit
 
