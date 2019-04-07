@@ -1,5 +1,6 @@
 from os import listdir, path
 from pygame import midi, mixer
+from keyboard_input import KeyboardInput
 
 def MidiInit():
     # pygame inits
@@ -8,87 +9,64 @@ def MidiInit():
     midi.init()
 
     # wypisywanie listy urządzeń wejściowych
-    dev_dic = {}
-    it = 0
+    input_devices = [-1]
+    print( '[0] Klawiatura' )
     for x in range( midi.get_count() ):
         dev_info = midi.get_device_info(x)
         if dev_info[2] == 1:
-            it += 1
-            dev_dic[it] = x
-            print( '[{}]'.format(it), dev_info[1].decode('utf-8') )
+            input_devices.append(x)
+            print( '[{}]'.format(len(input_devices)-1), dev_info[1].decode('utf-8') )
+
+    default_device = len(input_devices)-1
 
     # wybieranie urządzenia wejściowego
     try:
-        dev = int(input( "Wybierz urządzenie wejściowe [" + str(it) + "]: " ))
+        dev = int(input( "Wybierz urządzenie wejściowe [" + str(default_device) + "]: " ))
     except ValueError:
-        dev = it
-    if dev not in dev_dic:
-        dev = it
+        dev = default_device
+    if dev >= len(input_devices) or dev < 0:
+        print( 'Nieprawidłowy numer urządzenia! Wybrano domyślne.' )
+        dev = default_device
 
     # inicjalizacja urzadzenia
     inputs = []
-    inputs.append(midi.Input(dev_dic[dev]))
-    del dev_dic[dev]
-
-    # wypisywanie urządzeń wej-wyj
-    dev_out_dic = {}
-    for x in dev_dic.keys():
-        dev_info = midi.get_device_info(dev_dic[x])
-        for dev in range( midi.get_count() ):
-            dev_info1 = midi.get_device_info(dev)
-            if dev_info[1] == dev_info1[1] and dev_info1[3] == 1:
-                dev_out_dic[x] = dev
-                break
-        if x in dev_out_dic:
-            print( '[{}]'.format(x), dev_info[1].decode('utf-8') )
-
-    for x in dev_dic.keys():
-        if x in dev_out_dic:
-            it = x
-            break
-
-    # wybieranie urządzeia wej-wyj dla AI
-    try:
-        dev = int(input( "Wybierz urządzenie dla AI [" + str(it) + "]: " ))
-    except ValueError:
-        dev = it
-    if dev not in dev_dic or dev not in dev_out_dic:
-        dev = it
-
-    # inicjalizacja urzadzeia 
-    inputs.append(midi.Input(dev_dic[dev]))
-    output = midi.Output(dev_out_dic[dev], latency = 500)
+    dev_nr = input_devices[dev]
+    if dev_nr == -1:
+        inputs.append(KeyboardInput())
+        inputs[0].start()
+    else:
+        inputs.append(midi.Input(dev_nr))
 
     # wypisywanie dostępnych sampli
     dirlist = listdir('./samples')
-    dir_dic = {}
-    it = 0
+    samples = []
     for dirname in dirlist:
         if path.isdir('./samples/' + dirname):
-            it += 1
-            dir_dic[it] = dirname
-            print( '[{}]'.format(it), dirname )
+            samples.append(dirname)
+            print( '[{}]'.format(len(samples)-1), dirname )
+    
+    default_samples = len(samples)-1
 
     # wybieranie sampli
     try:
-        samp = input( "Wybierz sample dźwiękowe [" + str(it) + "]: " )
+        samples_nr = int(input( "Wybierz sample dźwiękowe [" + str(default_samples) + "]: " ))
     except ValueError:
-        samp = it
-    if samp not in dir_dic:
-        samp = it
+        samples_nr = default_samples
+    if samples_nr >= len(samples) or samples_nr < 0:
+        samples_nr = default_samples
 
-    samp_path = './samples/' + dir_dic[samp]
+    samples_path = './samples/' + samples[samples_nr]
 
     # inicjalizacja plików dźwiękowych
     sounds = [{},{}]
-    for samp_name in listdir(samp_path):
-        name, ext = path.splitext(samp_name)
+    for sample_name in listdir(samples_path):
+        name, ext = path.splitext(sample_name)
         if ext == '.wav':
             try:
                 it = int(name)
             except:
                 continue
-            sounds[0][it] = mixer.Sound( samp_path + '/' + samp_name )
+            sounds[0][it] = mixer.Sound( samples_path + '/' + sample_name )
             sounds[1][it] = mixer.Sound( sounds[0][it] )
 
     # określanie pozostałych ustawień
@@ -104,7 +82,7 @@ def MidiInit():
 
     mixer.set_num_channels(channels)
 
-    return inputs,output,sounds,sustain
+    return inputs,sounds,sustain
 
 def MidiQuit():
     midi.quit()
